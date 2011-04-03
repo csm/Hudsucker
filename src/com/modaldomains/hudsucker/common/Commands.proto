@@ -1,0 +1,29 @@
+option java_package = "com.modaldomains.hudsucker.common";
+
+enum CommandType {
+	PING = 0;
+	REGISTER_CLIENT = 1;
+	DEREGISTER_CLIENT = 2;
+	ATTACH_TOKEN = 3;
+}
+
+message CommandRequest {
+	required string request_id = 1;
+	required CommandType type = 2 [default = PING];
+	repeated Parameter parameters = 3; 
+	message Parameter {
+		required string name = 1;
+		required string value = 2;
+	}
+}
+
+message CommandResponse {
+	required string request_id = 1;
+	required string response_id = 2;
+	required CommandType type = 3;
+	repeated Parameter parameters = 4;
+	message Parameter {
+		required string name = 1;
+		required string value = 2;
+	}
+}
