@@ -13,13 +13,13 @@ public final class Commands {
     PING(0, 0),
     REGISTER_CLIENT(1, 1),
     DEREGISTER_CLIENT(2, 2),
-    ATTACH_TOKEN(3, 3),
+    ERROR(3, 1000),
     ;
     
     public static final int PING_VALUE = 0;
     public static final int REGISTER_CLIENT_VALUE = 1;
     public static final int DEREGISTER_CLIENT_VALUE = 2;
-    public static final int ATTACH_TOKEN_VALUE = 3;
+    public static final int ERROR_VALUE = 1000;
     
     
     public final int getNumber() { return value; }
@@ -29,7 +29,7 @@ public final class Commands {
         case 0: return PING;
         case 1: return REGISTER_CLIENT;
         case 2: return DEREGISTER_CLIENT;
-        case 3: return ATTACH_TOKEN;
+        case 1000: return ERROR;
         default: return null;
       }
     }
@@ -60,7 +60,7 @@ public final class Commands {
     }
     
     private static final CommandType[] VALUES = {
-      PING, REGISTER_CLIENT, DEREGISTER_CLIENT, ATTACH_TOKEN, 
+      PING, REGISTER_CLIENT, DEREGISTER_CLIENT, ERROR, 
     };
     
     public static CommandType valueOf(
@@ -1317,7 +1317,7 @@ public final class Commands {
     boolean hasResponseId();
     String getResponseId();
     
-    // required .CommandType type = 3;
+    // required .CommandType type = 3 [default = ERROR];
     boolean hasType();
     com.modaldomains.hudsucker.common.Commands.CommandType getType();
     
@@ -1907,7 +1907,7 @@ public final class Commands {
       }
     }
     
-    // required .CommandType type = 3;
+    // required .CommandType type = 3 [default = ERROR];
     public static final int TYPE_FIELD_NUMBER = 3;
     private com.modaldomains.hudsucker.common.Commands.CommandType type_;
     public boolean hasType() {
@@ -1941,7 +1941,7 @@ public final class Commands {
     private void initFields() {
       requestId_ = "";
       responseId_ = "";
-      type_ = com.modaldomains.hudsucker.common.Commands.CommandType.PING;
+      type_ = com.modaldomains.hudsucker.common.Commands.CommandType.ERROR;
       parameters_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
@@ -2138,7 +2138,7 @@ public final class Commands {
         bitField0_ = (bitField0_ & ~0x00000001);
         responseId_ = "";
         bitField0_ = (bitField0_ & ~0x00000002);
-        type_ = com.modaldomains.hudsucker.common.Commands.CommandType.PING;
+        type_ = com.modaldomains.hudsucker.common.Commands.CommandType.ERROR;
         bitField0_ = (bitField0_ & ~0x00000004);
         if (parametersBuilder_ == null) {
           parameters_ = java.util.Collections.emptyList();
@@ -2410,8 +2410,8 @@ public final class Commands {
         onChanged();
       }
       
-      // required .CommandType type = 3;
-      private com.modaldomains.hudsucker.common.Commands.CommandType type_ = com.modaldomains.hudsucker.common.Commands.CommandType.PING;
+      // required .CommandType type = 3 [default = ERROR];
+      private com.modaldomains.hudsucker.common.Commands.CommandType type_ = com.modaldomains.hudsucker.common.Commands.CommandType.ERROR;
       public boolean hasType() {
         return ((bitField0_ & 0x00000004) == 0x00000004);
       }
@@ -2429,7 +2429,7 @@ public final class Commands {
       }
       public Builder clearType() {
         bitField0_ = (bitField0_ & ~0x00000004);
-        type_ = com.modaldomains.hudsucker.common.Commands.CommandType.PING;
+        type_ = com.modaldomains.hudsucker.common.Commands.CommandType.ERROR;
         onChanged();
         return this;
       }
@@ -2665,14 +2665,14 @@ public final class Commands {
       "_id\030\001 \002(\t\022 \n\004type\030\002 \002(\0162\014.CommandType:\004P" +
       "ING\022-\n\nparameters\030\003 \003(\0132\031.CommandRequest" +
       ".Parameter\032(\n\tParameter\022\014\n\004name\030\001 \002(\t\022\r\n" +
-      "\005value\030\002 \002(\t\"\260\001\n\017CommandResponse\022\022\n\nrequ" +
-      "est_id\030\001 \002(\t\022\023\n\013response_id\030\002 \002(\t\022\032\n\004typ" +
-      "e\030\003 \002(\0162\014.CommandType\022.\n\nparameters\030\004 \003(" +
-      "\0132\032.CommandResponse.Parameter\032(\n\tParamet" +
-      "er\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*U\n\013Comma",
-      "ndType\022\010\n\004PING\020\000\022\023\n\017REGISTER_CLIENT\020\001\022\025\n" +
-      "\021DEREGISTER_CLIENT\020\002\022\020\n\014ATTACH_TOKEN\020\003B#" +
-      "\n!com.modaldomains.hudsucker.common"
+      "\005value\030\002 \002(\t\"\267\001\n\017CommandResponse\022\022\n\nrequ" +
+      "est_id\030\001 \002(\t\022\023\n\013response_id\030\002 \002(\t\022!\n\004typ" +
+      "e\030\003 \002(\0162\014.CommandType:\005ERROR\022.\n\nparamete" +
+      "rs\030\004 \003(\0132\032.CommandResponse.Parameter\032(\n\t" +
+      "Parameter\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*O",
+      "\n\013CommandType\022\010\n\004PING\020\000\022\023\n\017REGISTER_CLIE" +
+      "NT\020\001\022\025\n\021DEREGISTER_CLIENT\020\002\022\n\n\005ERROR\020\350\007B" +
+      "#\n!com.modaldomains.hudsucker.common"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

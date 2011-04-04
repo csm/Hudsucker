@@ -4,7 +4,7 @@ enum CommandType {
 	PING = 0;
 	REGISTER_CLIENT = 1;
 	DEREGISTER_CLIENT = 2;
-	ATTACH_TOKEN = 3;
+	ERROR = 1000;
 }
 
 message CommandRequest {
@@ -20,7 +20,7 @@ message CommandRequest {
 message CommandResponse {
 	required string request_id = 1;
 	required string response_id = 2;
-	required CommandType type = 3;
+	required CommandType type = 3 [default = ERROR];
 	repeated Parameter parameters = 4;
 	message Parameter {
 		required string name = 1;

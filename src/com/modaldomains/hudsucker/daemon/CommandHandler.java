@@ -10,20 +10,24 @@ import java.util.*;
 import java.util.concurrent.*;
 
 import com.modaldomains.hudsucker.common.AcceptedConnectionHandler;
+import com.modaldomains.hudsucker.common.Commands.CommandResponse;
+import com.modaldomains.hudsucker.common.Commands.CommandType;
 import com.modaldomains.hudsucker.common.OneRunnable;
 import com.modaldomains.hudsucker.common.Commands;
 import com.modaldomains.hudsucker.common.Commands.CommandRequest;
+import com.modaldomains.hudsucker.common.Utils;
 
 public class CommandHandler implements AcceptedConnectionHandler, OneRunnable, Runnable
 {
 	class Runner implements Runnable
 	{
 		ByteBuffer buffer;
+		ByteBuffer outBuffer;
 		SocketChannel channel;
 		
 		public Runner(SocketChannel channel)
 		{
-			buffer = ByteBuffer.allocate(10);
+			buffer = ByteBuffer.allocate(16);
 			this.channel = channel;
 		}
 		
@@ -31,8 +35,10 @@ public class CommandHandler implements AcceptedConnectionHandler, OneRunnable, R
 		{
 			try
 			{
-				byte[] data = buffer.array();
+				byte[] data = new byte[buffer.remaining()];
+				buffer.duplicate().get(data);
 				Commands.CommandRequest request = Commands.CommandRequest.parseFrom(data);
+				Commands.CommandResponse response = null;
 				
 				switch (request.getType())
 				{
@@ -42,6 +48,12 @@ public class CommandHandler implements AcceptedConnectionHandler, OneRunnable, R
 					Client client = ClientMap.INSTANCE.getClient(address);
 					if (client != null)
 						client.ping();
+					
+					Commands.CommandResponse.Builder builder = Commands.CommandResponse.newBuilder();
+					builder.setType(CommandType.PING);
+					builder.setRequestId(request.getRequestId());
+					builder.setResponseId(UUID.randomUUID().toString());
+					response = builder.build();
 				}
 					break;
 					
@@ -49,17 +61,43 @@ public class CommandHandler implements AcceptedConnectionHandler, OneRunnable, R
 				{
 					SocketAddress address = channel.socket().getRemoteSocketAddress();
 					ClientMap.INSTANCE.removeClient(address);
+					Commands.CommandResponse.Builder builder = Commands.CommandResponse.newBuilder();
+					builder.setType(CommandType.DEREGISTER_CLIENT);
+					builder.setRequestId(request.getRequestId());
+					builder.setResponseId(UUID.randomUUID().toString());
+					response = builder.build();
 				}
 					break;
 					
 				case REGISTER_CLIENT:
 				{
 					SocketAddress address = channel.socket().getRemoteSocketAddress();
-					Client client = new Client(address);
+					Client client = new Client((InetSocketAddress) address);
 					ClientMap.INSTANCE.addClient(client);
+					Commands.CommandResponse.Builder builder = Commands.CommandResponse.newBuilder();
+					builder.setType(CommandType.REGISTER_CLIENT);
+					builder.setRequestId(request.getRequestId());
+					builder.setResponseId(UUID.randomUUID().toString());
+					response = builder.build();
+				}
+					break;
+					
+				default:
+				{
+					Commands.CommandResponse.Builder builder = Commands.CommandResponse.newBuilder();
+					builder.setType(CommandType.ERROR);
+					builder.setRequestId(request.getRequestId());
+					builder.setResponseId(UUID.randomUUID().toString());
+					Commands.CommandResponse.Parameter.Builder reason = Commands.CommandResponse.Parameter.newBuilder();
+					reason.setName("reason");
+					reason.setValue("unknown-command");
+					builder.addParameters(reason);
+					response = builder.build();
 				}
 					break;
 				}
+				
+				outBuffer = ByteBuffer.wrap(response.toByteArray());
 			}
 			catch (Exception e)
 			{
@@ -92,7 +130,8 @@ public class CommandHandler implements AcceptedConnectionHandler, OneRunnable, R
 		try
 		{
 			channels.add(channel);
-			channel.register(selector, SelectionKey.OP_READ);
+			channel.configureBlocking(false);
+			channel.register(selector, SelectionKey.OP_READ, new Runner(channel));
 		}
 		catch (java.io.IOException ioe)
 		{
@@ -118,7 +157,44 @@ public class CommandHandler implements AcceptedConnectionHandler, OneRunnable, R
 			int n = selector.select(timeout);
 			if (n > 0)
 			{
-				
+				for (SelectionKey k : selector.selectedKeys())
+				{
+					SocketChannel channel = (SocketChannel) k.channel();
+					Runner r = (Runner) k.attachment();
+					if (!channel.isOpen())
+					{
+						// Remote hung up?
+						k.cancel();
+						channel.close();
+						this.channels.remove(channel);
+					}
+					if (k.isReadable())
+					{
+						if (r.buffer.remaining() == 0)
+						{
+							r.buffer = Utils.resize(r.buffer);
+						}
+						while (channel.read(r.buffer) > 0)
+						{
+							if (r.buffer.remaining() == 0)
+								r.buffer = Utils.resize(r.buffer);
+						}
+						this.taskQueue.add(r);
+					}
+					if (k.isWritable())
+					{
+						if (r.outBuffer != null)
+						{
+							while (r.outBuffer.hasRemaining())
+							{
+								if (channel.write(r.outBuffer) == 0)
+									break;
+							}
+							if (!r.outBuffer.hasRemaining())
+								r.outBuffer = null;
+						}
+					}
+				}
 			}
 		}
 		catch (java.io.IOException ioe)
