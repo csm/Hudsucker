@@ -1,6 +1,9 @@
 package com.modaldomains.hudsucker.daemon;
 
 import java.io.*;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
@@ -9,16 +12,19 @@ import java.util.concurrent.*;
 import com.modaldomains.hudsucker.common.AcceptedConnectionHandler;
 import com.modaldomains.hudsucker.common.OneRunnable;
 import com.modaldomains.hudsucker.common.Commands;
+import com.modaldomains.hudsucker.common.Commands.CommandRequest;
 
 public class CommandHandler implements AcceptedConnectionHandler, OneRunnable, Runnable
 {
 	class Runner implements Runnable
 	{
 		ByteBuffer buffer;
+		SocketChannel channel;
 		
-		public Runner()
+		public Runner(SocketChannel channel)
 		{
 			buffer = ByteBuffer.allocate(10);
+			this.channel = channel;
 		}
 		
 		public void run()
@@ -31,15 +37,27 @@ public class CommandHandler implements AcceptedConnectionHandler, OneRunnable, R
 				switch (request.getType())
 				{
 				case PING:
+				{
+					SocketAddress address = channel.socket().getRemoteSocketAddress();
+					Client client = ClientMap.INSTANCE.getClient(address);
+					if (client != null)
+						client.ping();
+				}
 					break;
 					
 				case DEREGISTER_CLIENT:
+				{
+					SocketAddress address = channel.socket().getRemoteSocketAddress();
+					ClientMap.INSTANCE.removeClient(address);
+				}
 					break;
 					
 				case REGISTER_CLIENT:
-					break;
-					
-				case ATTACH_TOKEN:
+				{
+					SocketAddress address = channel.socket().getRemoteSocketAddress();
+					Client client = new Client(address);
+					ClientMap.INSTANCE.addClient(client);
+				}
 					break;
 				}
 			}
