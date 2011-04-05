@@ -19,15 +19,62 @@
 
 package com.modaldomains.hudsucker.daemon;
 
+import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
+
+import com.modaldomains.hudsucker.common.SocketListener;
+
+import gnu.getopt.*;
+
 public class Driver
 {
 
 	/**
 	 * @param args
 	 */
-	public static void main(final String[] args)
+	public static void main(final String[] args) throws Exception
 	{
-		// TODO Auto-generated method stub
-
+		Getopt getopt = new Getopt("hudd", args, "l:L:p:P:hv", new LongOpt[]
+		{
+			new LongOpt("listen-address", LongOpt.REQUIRED_ARGUMENT, null, 'l'),
+			new LongOpt("command-adddress", LongOpt.REQUIRED_ARGUMENT, null, 'L'),
+			new LongOpt("port", LongOpt.REQUIRED_ARGUMENT, null, 'p'),
+			new LongOpt("command-port", LongOpt.REQUIRED_ARGUMENT, null, 'P'),
+			new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h')
+        });
+		
+		int opt = 0;
+		while ((opt = getopt.getopt()) != -1)
+		{
+			switch (opt)
+			{
+			case 'h':
+				System.out.println("usage: hudd [options]");
+				System.out.println();
+				System.out.println(" -l, --listen-address ADDR    Bind to ADDR to accept connections (default: any address).");
+				System.out.println(" -L, --command-address ADDR   Bind to ADDR to accept command connections (default: any address).");
+				System.out.println(" -p, --port PORT              Listen for connections on PORT (default: 443).");
+				System.out.println(" -P, --command-port PORT      Listen for command connections on PORT (default: 9999)");
+				System.out.println(" -h, --help                   Show this message and exit.");
+				System.out.println(" -v, --version                Print version number and exit.");
+				System.exit(0);
+			}
+		}
+		
+		CommandHandler commandHandler = new CommandHandler();
+		ServerSocketChannel commandChannel = ServerSocketChannel.open();
+		commandChannel.socket().bind(new InetSocketAddress(9999));
+		SocketListener commandListener = new SocketListener(commandChannel);
+		commandListener.addAcceptHandler(commandHandler);
+		Thread commandThread = new Thread(commandListener);
+		commandThread.setName("CommandThread");
+		commandThread.start();
+		
+		ConnectionHandler mainHandler = new ConnectionHandler();
+		ServerSocketChannel mainChannel = ServerSocketChannel.open();
+		mainChannel.socket().bind(new InetSocketAddress(9443));
+		SocketListener mainListener = new SocketListener(mainChannel);
+		mainListener.addAcceptHandler(mainHandler);
+		mainListener.run();
 	}
 }

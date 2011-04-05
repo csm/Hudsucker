@@ -5,7 +5,7 @@ import java.io.*;
 import java.nio.*;
 import java.nio.channels.*;
 
-public class SocketListener implements Runnable
+public class SocketListener implements OneRunnable, Runnable
 {
 	protected ServerSocketChannel channel;
 	protected Selector selector;
@@ -17,6 +17,7 @@ public class SocketListener implements Runnable
 	{
 		this.channel = channel;
 		this.selector = Selector.open();
+		channel.configureBlocking(false);
 		this.channel.register(this.selector, SelectionKey.OP_ACCEPT);
 		
 		this.acceptHandlers = new HashSet<AcceptedConnectionHandler>();
@@ -30,26 +31,25 @@ public class SocketListener implements Runnable
 		isRunning = true;
 		while (isRunning)
 		{
-			try
-			{
-				this.runOne();
-			}
-			catch (IOException ioe)
-			{
-				// pass -- FIXME
-			}
+			this.runOne(1000);
 		}
 	}
 	
-	public void runOne()
-		throws IOException
+	public void runOne(long timeout)
 	{
-		int n = selector.selectNow();
-		if (n > 0)
+		try
 		{
-			SocketChannel clientChannel = channel.accept();
-			for (AcceptedConnectionHandler handler : acceptHandlers)
-				handler.didAcceptConnection(channel, clientChannel);
+			int n = selector.select(timeout);
+			if (n > 0)
+			{
+				SocketChannel clientChannel = channel.accept();
+				for (AcceptedConnectionHandler handler : acceptHandlers)
+					handler.didAcceptConnection(channel, clientChannel);
+			}
+		}
+		catch (java.io.IOException ioe)
+		{
+			ioe.printStackTrace();	
 		}
 	}
 	
