@@ -108,14 +108,28 @@ public class FP
 	 * @param <R>
 	 * @param c
 	 * @param fn
+	 * @param initial
+	 * @return
+	 */
+	public static <E, R> R fold(Collection<E> c, FN2<E, R> fn, R initial)
+	{
+		R ret = initial;
+		for (E e : c)
+			ret = fn.a(e, ret);
+		return ret;
+	}
+	
+	/**
+	 * 
+	 * @param <E>
+	 * @param <R>
+	 * @param c
+	 * @param fn
 	 * @return
 	 */
 	public static <E, R> R fold(Collection<E> c, FN2<E, R> fn)
 	{
-		R ret = null;
-		for (E e : c)
-			ret = fn.a(e, ret);
-		return ret;
+		return FP.fold(c, fn, null);
 	}
 	
 	/**
@@ -208,6 +222,8 @@ public class FP
 		
 		public FilteredCollection(Collection<T> collection, P<T> predicate)
 		{
+			collection.getClass();
+			predicate.getClass();
 			this.collection = collection;
 			this.predicate = predicate;
 		}
@@ -241,6 +257,8 @@ public class FP
 					}
 					if (!gotNext)
 						hasNext = false;
+					else
+						hasNext = true;
 				}
 
 				@Override
@@ -281,7 +299,7 @@ public class FP
 						accumulator = accumulator + 1;
 					return accumulator;
 				}
-			});
+			}, 0);
 		}
 	}
 }

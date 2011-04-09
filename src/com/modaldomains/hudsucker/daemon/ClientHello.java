@@ -40,8 +40,7 @@ exception statement from your version.  */
 
 package com.modaldomains.hudsucker.daemon;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
+import org.jboss.netty.buffer.ChannelBuffer;
 
 /**
  * A ClientHello handshake message.
@@ -72,14 +71,14 @@ public class ClientHello implements Handshake.Body
   // The location of the session_id bytes (if any).
   protected static final int SESSID_OFFSET2 = SESSID_OFFSET + 1;
 
-  protected ByteBuffer buffer;
+  protected ChannelBuffer buffer;
 
   // Constructor.
   // -------------------------------------------------------------------------
 
-  public ClientHello (final ByteBuffer buffer)
+  public ClientHello (final ChannelBuffer buffer)
   {
-    this.buffer = buffer.duplicate().order(ByteOrder.BIG_ENDIAN);
+	  this.buffer = buffer;
   }
 
   // Instance methods.
@@ -102,20 +101,16 @@ public class ClientHello implements Handshake.Body
    */
   public byte[] random()
   {
-    ByteBuffer randomBuf =
-      ((ByteBuffer) buffer.duplicate ().position (RANDOM_OFFSET)
-       .limit (SESSID_OFFSET)).slice ();
-    byte[] ret = new byte[randomBuf.limit()];
-    randomBuf.get(ret);
-    return ret;
+	  byte[] ret = new byte[SESSID_OFFSET - RANDOM_OFFSET];
+	  buffer.getBytes(RANDOM_OFFSET, ret);
+	  return ret;
   }
 
   public byte[] sessionId()
   {
-    int idlen = buffer.get (SESSID_OFFSET) & 0xFF;
-    byte[] sessionId = new byte[idlen];
-    buffer.position (SESSID_OFFSET2);
-    buffer.get (sessionId);
-    return sessionId;
+	  int idlen = buffer.getByte(SESSID_OFFSET) & 0xFF;
+	  byte[] sessionId = new byte[idlen];
+	  buffer.getBytes(SESSID_OFFSET2, sessionId);
+	  return sessionId;
   }
 }

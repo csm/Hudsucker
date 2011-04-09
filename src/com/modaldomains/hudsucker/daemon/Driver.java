@@ -28,6 +28,7 @@ import gnu.getopt.*;
 
 public class Driver
 {
+	static String VERSION = "0.0.1";
 
 	/**
 	 * @param args
@@ -42,6 +43,11 @@ public class Driver
 			new LongOpt("command-port", LongOpt.REQUIRED_ARGUMENT, null, 'P'),
 			new LongOpt("help", LongOpt.NO_ARGUMENT, null, 'h')
         });
+		
+		int lport = 443;
+		int cport = 9999;
+		String laddr = null;
+		String caddr = null;
 		
 		int opt = 0;
 		while ((opt = getopt.getopt()) != -1)
@@ -58,23 +64,31 @@ public class Driver
 				System.out.println(" -h, --help                   Show this message and exit.");
 				System.out.println(" -v, --version                Print version number and exit.");
 				System.exit(0);
+				
+			case 'v':
+				System.out.println("hudd version " + VERSION);
+				System.exit(0);
+				
+			case 'p':
+				lport = Integer.parseInt(getopt.getOptarg());
+				break;
+				
+			case 'P':
+				cport = Integer.parseInt(getopt.getOptarg());
+				break;
 			}
 		}
 		
-		CommandHandler commandHandler = new CommandHandler();
-		ServerSocketChannel commandChannel = ServerSocketChannel.open();
-		commandChannel.socket().bind(new InetSocketAddress(9999));
-		SocketListener commandListener = new SocketListener(commandChannel);
-		commandListener.addAcceptHandler(commandHandler);
-		Thread commandThread = new Thread(commandListener);
+		CommandServer server = new CommandServer(caddr, cport);
+		Thread commandThread = new Thread(server);
 		commandThread.setName("CommandThread");
 		commandThread.start();
 		
-		ConnectionHandler mainHandler = new ConnectionHandler();
+		/*ConnectionHandler mainHandler = new ConnectionHandler();
 		ServerSocketChannel mainChannel = ServerSocketChannel.open();
-		mainChannel.socket().bind(new InetSocketAddress(9443));
+		mainChannel.socket().bind(new InetSocketAddress(lport));
 		SocketListener mainListener = new SocketListener(mainChannel);
 		mainListener.addAcceptHandler(mainHandler);
-		mainListener.run();
+		mainListener.run();*/
 	}
 }

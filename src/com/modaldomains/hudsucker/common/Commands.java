@@ -1321,7 +1321,11 @@ public final class Commands {
     boolean hasType();
     com.modaldomains.hudsucker.common.Commands.CommandType getType();
     
-    // repeated .CommandResponse.Parameter parameters = 4;
+    // required bool success = 4;
+    boolean hasSuccess();
+    boolean getSuccess();
+    
+    // repeated .CommandResponse.Parameter parameters = 5;
     java.util.List<com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter> 
         getParametersList();
     com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter getParameters(int index);
@@ -1917,8 +1921,18 @@ public final class Commands {
       return type_;
     }
     
-    // repeated .CommandResponse.Parameter parameters = 4;
-    public static final int PARAMETERS_FIELD_NUMBER = 4;
+    // required bool success = 4;
+    public static final int SUCCESS_FIELD_NUMBER = 4;
+    private boolean success_;
+    public boolean hasSuccess() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    public boolean getSuccess() {
+      return success_;
+    }
+    
+    // repeated .CommandResponse.Parameter parameters = 5;
+    public static final int PARAMETERS_FIELD_NUMBER = 5;
     private java.util.List<com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter> parameters_;
     public java.util.List<com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter> getParametersList() {
       return parameters_;
@@ -1942,6 +1956,7 @@ public final class Commands {
       requestId_ = "";
       responseId_ = "";
       type_ = com.modaldomains.hudsucker.common.Commands.CommandType.ERROR;
+      success_ = false;
       parameters_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
@@ -1958,6 +1973,10 @@ public final class Commands {
         return false;
       }
       if (!hasType()) {
+        memoizedIsInitialized = 0;
+        return false;
+      }
+      if (!hasSuccess()) {
         memoizedIsInitialized = 0;
         return false;
       }
@@ -1983,8 +2002,11 @@ public final class Commands {
       if (((bitField0_ & 0x00000004) == 0x00000004)) {
         output.writeEnum(3, type_.getNumber());
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeBool(4, success_);
+      }
       for (int i = 0; i < parameters_.size(); i++) {
-        output.writeMessage(4, parameters_.get(i));
+        output.writeMessage(5, parameters_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -2007,9 +2029,13 @@ public final class Commands {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(3, type_.getNumber());
       }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, success_);
+      }
       for (int i = 0; i < parameters_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(4, parameters_.get(i));
+          .computeMessageSize(5, parameters_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2140,9 +2166,11 @@ public final class Commands {
         bitField0_ = (bitField0_ & ~0x00000002);
         type_ = com.modaldomains.hudsucker.common.Commands.CommandType.ERROR;
         bitField0_ = (bitField0_ & ~0x00000004);
+        success_ = false;
+        bitField0_ = (bitField0_ & ~0x00000008);
         if (parametersBuilder_ == null) {
           parameters_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
         } else {
           parametersBuilder_.clear();
         }
@@ -2196,10 +2224,14 @@ public final class Commands {
           to_bitField0_ |= 0x00000004;
         }
         result.type_ = type_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.success_ = success_;
         if (parametersBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          if (((bitField0_ & 0x00000010) == 0x00000010)) {
             parameters_ = java.util.Collections.unmodifiableList(parameters_);
-            bitField0_ = (bitField0_ & ~0x00000008);
+            bitField0_ = (bitField0_ & ~0x00000010);
           }
           result.parameters_ = parameters_;
         } else {
@@ -2230,11 +2262,14 @@ public final class Commands {
         if (other.hasType()) {
           setType(other.getType());
         }
+        if (other.hasSuccess()) {
+          setSuccess(other.getSuccess());
+        }
         if (parametersBuilder_ == null) {
           if (!other.parameters_.isEmpty()) {
             if (parameters_.isEmpty()) {
               parameters_ = other.parameters_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
             } else {
               ensureParametersIsMutable();
               parameters_.addAll(other.parameters_);
@@ -2247,7 +2282,7 @@ public final class Commands {
               parametersBuilder_.dispose();
               parametersBuilder_ = null;
               parameters_ = other.parameters_;
-              bitField0_ = (bitField0_ & ~0x00000008);
+              bitField0_ = (bitField0_ & ~0x00000010);
               parametersBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
                    getParametersFieldBuilder() : null;
@@ -2270,6 +2305,10 @@ public final class Commands {
           return false;
         }
         if (!hasType()) {
+          
+          return false;
+        }
+        if (!hasSuccess()) {
           
           return false;
         }
@@ -2326,7 +2365,12 @@ public final class Commands {
               }
               break;
             }
-            case 34: {
+            case 32: {
+              bitField0_ |= 0x00000008;
+              success_ = input.readBool();
+              break;
+            }
+            case 42: {
               com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter.Builder subBuilder = com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter.newBuilder();
               input.readMessage(subBuilder, extensionRegistry);
               addParameters(subBuilder.buildPartial());
@@ -2434,13 +2478,34 @@ public final class Commands {
         return this;
       }
       
-      // repeated .CommandResponse.Parameter parameters = 4;
+      // required bool success = 4;
+      private boolean success_ ;
+      public boolean hasSuccess() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      public boolean getSuccess() {
+        return success_;
+      }
+      public Builder setSuccess(boolean value) {
+        bitField0_ |= 0x00000008;
+        success_ = value;
+        onChanged();
+        return this;
+      }
+      public Builder clearSuccess() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        success_ = false;
+        onChanged();
+        return this;
+      }
+      
+      // repeated .CommandResponse.Parameter parameters = 5;
       private java.util.List<com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter> parameters_ =
         java.util.Collections.emptyList();
       private void ensureParametersIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
           parameters_ = new java.util.ArrayList<com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter>(parameters_);
-          bitField0_ |= 0x00000008;
+          bitField0_ |= 0x00000010;
          }
       }
       
@@ -2556,7 +2621,7 @@ public final class Commands {
       public Builder clearParameters() {
         if (parametersBuilder_ == null) {
           parameters_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000008);
+          bitField0_ = (bitField0_ & ~0x00000010);
           onChanged();
         } else {
           parametersBuilder_.clear();
@@ -2612,7 +2677,7 @@ public final class Commands {
           parametersBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
               com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter, com.modaldomains.hudsucker.common.Commands.CommandResponse.Parameter.Builder, com.modaldomains.hudsucker.common.Commands.CommandResponse.ParameterOrBuilder>(
                   parameters_,
-                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  ((bitField0_ & 0x00000010) == 0x00000010),
                   getParentForChildren(),
                   isClean());
           parameters_ = null;
@@ -2665,14 +2730,15 @@ public final class Commands {
       "_id\030\001 \002(\t\022 \n\004type\030\002 \002(\0162\014.CommandType:\004P" +
       "ING\022-\n\nparameters\030\003 \003(\0132\031.CommandRequest" +
       ".Parameter\032(\n\tParameter\022\014\n\004name\030\001 \002(\t\022\r\n" +
-      "\005value\030\002 \002(\t\"\267\001\n\017CommandResponse\022\022\n\nrequ" +
+      "\005value\030\002 \002(\t\"\310\001\n\017CommandResponse\022\022\n\nrequ" +
       "est_id\030\001 \002(\t\022\023\n\013response_id\030\002 \002(\t\022!\n\004typ" +
-      "e\030\003 \002(\0162\014.CommandType:\005ERROR\022.\n\nparamete" +
-      "rs\030\004 \003(\0132\032.CommandResponse.Parameter\032(\n\t" +
-      "Parameter\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t*O",
-      "\n\013CommandType\022\010\n\004PING\020\000\022\023\n\017REGISTER_CLIE" +
-      "NT\020\001\022\025\n\021DEREGISTER_CLIENT\020\002\022\n\n\005ERROR\020\350\007B" +
-      "#\n!com.modaldomains.hudsucker.common"
+      "e\030\003 \002(\0162\014.CommandType:\005ERROR\022\017\n\007success\030" +
+      "\004 \002(\010\022.\n\nparameters\030\005 \003(\0132\032.CommandRespo" +
+      "nse.Parameter\032(\n\tParameter\022\014\n\004name\030\001 \002(\t",
+      "\022\r\n\005value\030\002 \002(\t*O\n\013CommandType\022\010\n\004PING\020\000" +
+      "\022\023\n\017REGISTER_CLIENT\020\001\022\025\n\021DEREGISTER_CLIE" +
+      "NT\020\002\022\n\n\005ERROR\020\350\007B#\n!com.modaldomains.hud" +
+      "sucker.common"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
       new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {
@@ -2700,7 +2766,7 @@ public final class Commands {
           internal_static_CommandResponse_fieldAccessorTable = new
             com.google.protobuf.GeneratedMessage.FieldAccessorTable(
               internal_static_CommandResponse_descriptor,
-              new java.lang.String[] { "RequestId", "ResponseId", "Type", "Parameters", },
+              new java.lang.String[] { "RequestId", "ResponseId", "Type", "Success", "Parameters", },
               com.modaldomains.hudsucker.common.Commands.CommandResponse.class,
               com.modaldomains.hudsucker.common.Commands.CommandResponse.Builder.class);
           internal_static_CommandResponse_Parameter_descriptor =

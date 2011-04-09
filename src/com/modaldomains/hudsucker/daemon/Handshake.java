@@ -45,6 +45,8 @@ import java.io.StringWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import org.jboss.netty.buffer.ChannelBuffer;
+
 /**
  * An SSL handshake message. SSL handshake messages have the following
  * form:
@@ -75,15 +77,15 @@ public final class Handshake //implements Constructed
   // Fields.
   // -------------------------------------------------------------------------
 
-  private final ByteBuffer buffer;
+  private final ChannelBuffer buffer;
   private final ProtocolVersion version;
 
   // Constructors.
   // -------------------------------------------------------------------------
 
-  public Handshake (final ByteBuffer buffer)
+  public Handshake (final ChannelBuffer buffer)
   {
-	  this.buffer = buffer.duplicate().order(ByteOrder.BIG_ENDIAN);
+	  this.buffer = buffer.duplicate();
 	  this.version = ProtocolVersion.TLS_1_1;
   }
 
@@ -97,7 +99,7 @@ public final class Handshake //implements Constructed
    */
   public Type type()
   {
-    return Type.forInteger (buffer.get (0) & 0xFF);
+    return Type.forInteger(buffer.getByte(0) & 0xFF);
   }
 
   /**
@@ -108,7 +110,7 @@ public final class Handshake //implements Constructed
   public int length ()
   {
     // Length is a uint24.
-    return buffer.getInt (0) & 0xFFFFFF;
+    return buffer.getInt(0) & 0xFFFFFF;
   }
 
   /**
@@ -120,14 +122,14 @@ public final class Handshake //implements Constructed
   public Body body()
   {
     Type type = type ();
-    ByteBuffer bodyBuffer = bodyBuffer ();
+    ChannelBuffer bodyBuffer = bodyBuffer();
     switch (type)
       {
       case CLIENT_HELLO:
-        return new ClientHello (bodyBuffer);
+        return new ClientHello(bodyBuffer);
 
       case SERVER_HELLO:
-        return new ServerHello (bodyBuffer);
+        return new ServerHello(bodyBuffer);
       }
     return null;
   }
@@ -138,12 +140,12 @@ public final class Handshake //implements Constructed
    *
    * @return The body's byte buffer.
    */
-  public ByteBuffer bodyBuffer ()
+  public ChannelBuffer bodyBuffer()
   {
-    int length = length ();
-    if (length > buffer.limit() + 4)
-    	length = buffer.limit() - 4;
-    return ((ByteBuffer) buffer.position (4).limit (4 + length)).slice ();
+	  int length = length();
+	  if (length > buffer.readableBytes() + 4)
+		  length = buffer.readableBytes() - 4;
+	  return buffer.slice(4, length);
   }
 
   // Inner class.

@@ -21,7 +21,8 @@ message CommandResponse {
 	required string request_id = 1;
 	required string response_id = 2;
 	required CommandType type = 3 [default = ERROR];
-	repeated Parameter parameters = 4;
+	required bool success = 4;
+	repeated Parameter parameters = 5;
 	message Parameter {
 		required string name = 1;
 		required string value = 2;

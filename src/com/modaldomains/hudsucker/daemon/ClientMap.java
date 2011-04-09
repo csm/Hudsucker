@@ -1,5 +1,7 @@
 package com.modaldomains.hudsucker.daemon;
 
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.Collection;
 import java.util.Comparator;
@@ -26,7 +28,9 @@ public class ClientMap
 			@Override
 			public Boolean a(Client input)
 			{
-				return c.address().equals(input.address());
+				InetAddress a1 = c.address().getAddress();
+				InetAddress a2 = input.address().getAddress();
+				return a1.equals(a2);
 			}
 			
 		});
@@ -39,8 +43,11 @@ public class ClientMap
 		Collection<Client> c = FP.filter(clients.values(), new FP.P<Client>()
 		{
 			@Override
-			public Boolean a(Client input) {
-				return input.address().equals(address);
+			public Boolean a(Client input)
+			{
+				InetAddress a1 = input.address().getAddress();
+				InetAddress a2 = ((InetSocketAddress) address).getAddress();
+				return a1.equals(a2);
 			}
 			
 		});
@@ -57,8 +64,11 @@ public class ClientMap
 		Collection<Client> c = FP.filter(clients.values(), new FP.P<Client>()
 		{
 			@Override
-			public Boolean a(Client input) {
-				return input.address().equals(address);
+			public Boolean a(Client input)
+			{
+				InetAddress a1 = input.address().getAddress();
+				InetAddress a2 = ((InetSocketAddress) address).getAddress();
+				return a1.equals(a2);
 			}
 		});
 		clients.keySet().removeAll(c);
